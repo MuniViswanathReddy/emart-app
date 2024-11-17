@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -96,11 +97,12 @@ public class CustomerService {
         customer.setPassword(customerInfo.getPassword());
         customer.setDob(customerInfo.getDob());
         customer.setGender(customerInfo.getGender());
-        List<AddressInfo> addressInfoList = customerInfo.getAddress();
 
+        List<AddressInfo> addressInfoList = customerInfo.getAddress();
         List<Address> addressList = customer.getAddresses();
+
         for (AddressInfo addressInfo : addressInfoList) {
-            Optional<Address> addressOptional = addressList.stream().filter(address -> address.equals(addressInfo)).findAny();
+            Optional<Address> addressOptional = addressList.stream().filter(address -> Objects.equals(address.getAddressType(), addressInfo.getAddressType())).findFirst();
             if (addressOptional.isPresent()) {
                 Address address = addressOptional.get();
                 address.setStreet1(addressInfo.getStreet1());
@@ -110,11 +112,15 @@ public class CustomerService {
                 address.setState(addressInfo.getState());
                 address.setCountry(addressInfo.getCountry());
                 address.setPinCode(addressInfo.getPinCode());
+                address.setCustomer(customer);
+
             }
         }
-        addressInfoList.removeAll(addressList);
+        addressInfoList.removeIf(addressInfo -> addressList.stream().anyMatch(address -> Objects.equals(address.getAddressType(), addressInfo.getAddressType())));
+
         for (AddressInfo addressInfo : addressInfoList) {
             Address address = new Address();
+            address.setAddressType(addressInfo.getAddressType());
             address.setStreet1(addressInfo.getStreet1());
             address.setStreet2(addressInfo.getStreet2());
             address.setCityOrTown(addressInfo.getCityOrTown());
@@ -122,10 +128,9 @@ public class CustomerService {
             address.setState(addressInfo.getState());
             address.setCountry(addressInfo.getCountry());
             address.setPinCode(addressInfo.getPinCode());
-
+            address.setCustomer(customer);
             addressList.add(address);
         }
-
         return "Customer Updated Successfully";
     }
 

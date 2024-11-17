@@ -1,7 +1,10 @@
 package com.rest.resource.entity;
 
+import com.rest.resource.dto.AddressInfo;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.stream.DoubleStream;
 
 @Setter
 @Getter
@@ -15,24 +18,25 @@ public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "address_id")
-    public int addressId;
+    private int addressId;
     @Column(name = "address_type")
-    public String addressType;
+    private String addressType;
     @Column(name = "street1 ")
-    public String street1;
+    private String street1;
     @Column(name = "street2")
-    public String street2;
+    private String street2;
     @Column(name = "city_or_town")
-    public String cityOrTown;
+    private String cityOrTown;
     @Column(name = "district")
-    public String district;
+    private String district;
     @Column(name = "state")
-    public String state;
+    private String state;
     @Column(name = "country")
-    public String country;
+    private String country;
     @Column(name = "pin_code")
-    public int pinCode;
+    private int pinCode;
     @ManyToOne
     @JoinColumn(name = "address_customer_id", nullable = true)
-    public Customer customer;
+    private Customer customer;
+
 }
