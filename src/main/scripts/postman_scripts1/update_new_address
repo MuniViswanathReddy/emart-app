@@ -1,0 +1,2 @@
+method:-PUT
+url:-http://localhost:8080/customer/update-new-address/mobile-no

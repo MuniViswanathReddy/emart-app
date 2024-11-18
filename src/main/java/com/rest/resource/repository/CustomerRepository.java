@@ -13,8 +13,4 @@ public interface CustomerRepository extends CrudRepository<Customer, Integer> {
     @Query(value = "from Customer where mobileNo=:phoneNo")
     public Customer findByPhoneNo(String phoneNo);
 
-
-   /* @Modifying
-    @Query(value = "update from Customer c set c.name=:customerName where c.mobileNo=:phoneNo")
-    public int updateCustomer(String customerName, String phoneNo);*/
 }
