@@ -1,0 +1,35 @@
+    method:POST
+    url:-http://localhost:8080/customer
+     dummy data:-
+      {
+        "name": "jagadeesh",
+        "email": "jaggu@gmail.com",
+        "password": "jaggu@123",
+        "phone": "9878098809",
+        "gender": "male",
+        "dob": "21/1/2001",
+        "address": [
+            {
+                "addressType": "home",
+                "street1": "doorNo:2/40",
+                "street2": "2nd street",
+                "cityOrTown": "gandluru",
+                "district": "kadapa",
+                "state": "Andra Pradesh",
+                "country": "India",
+                "pinCode": 516444
+            },
+            {
+                "addressType": "Office",
+                "street1": "marthalli",
+                "street2": "bench street",
+                "cityOrTown": "bangloor city",
+                "district": "hosur",
+                "state": "karnataka",
+                "country": "India",
+                "pinCode": 587787
+            }
+        ]
+      }
+      -----------------------------------------------------------------------
+

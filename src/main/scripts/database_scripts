@@ -1,0 +1,8 @@
+use ecom;
+show tables;
+select *from address;
+select * from customers;
+drop table customers;
+drop table address;
+create table address (address_id int primary key auto_increment,address_type varchar(50),street1 varchar(50),street2 varchar(50),city_or_town varchar(50) not null,district varchar(50) not null,state varchar(50)not null,country varchar(50),pin_code varchar(20),address_customer_id int,foreign key (address_customer_id )references customers(id));
+create table customers (id int primary key auto_increment,name varchar(50) not null,mobile_no varchar(20) not null,email varchar(50)not null,password varchar(50) not null,gender varchar(20) not null,dob varchar(40) not null);

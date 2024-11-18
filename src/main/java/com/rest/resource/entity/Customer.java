@@ -31,6 +31,6 @@ public class Customer {
     public String gender;
     @Column(name = "dob")
     public String dob;
-    @OneToMany(mappedBy = "customer",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "customer",cascade = CascadeType.ALL,orphanRemoval = true)
     public List<Address> addresses;
 }

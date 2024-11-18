@@ -1,0 +1,2 @@
+method:-DELETE
+url:-http://localhost:8080/customers/mobile-no/address-type

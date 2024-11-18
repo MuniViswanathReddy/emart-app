@@ -36,7 +36,7 @@ public class Address {
     @Column(name = "pin_code")
     private int pinCode;
     @ManyToOne
-    @JoinColumn(name = "address_customer_id", nullable = true)
+    @JoinColumn(name = "address_customer_id",nullable = true)
     private Customer customer;
 
 }

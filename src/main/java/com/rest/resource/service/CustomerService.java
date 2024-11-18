@@ -4,6 +4,7 @@ import com.rest.resource.dto.AddressInfo;
 import com.rest.resource.dto.CustomerInfo;
 import com.rest.resource.entity.Address;
 import com.rest.resource.entity.Customer;
+import com.rest.resource.mappers.CustomerMapper;
 import com.rest.resource.repository.AddressRepository;
 import com.rest.resource.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,28 +24,17 @@ public class CustomerService {
     @Autowired
     private CustomerRepository customerRepository;
 
+    @Autowired
+    private CustomerMapper customerMapper;
+
     @Transactional
     public String customerAccountCreation(CustomerInfo customerInfo) {
-        Customer customer = new Customer();
-        customer.setName(customerInfo.getName());
-        customer.setEmail(customerInfo.getEmail());
-        customer.setMobileNo(customerInfo.getPhone());
-        customer.setPassword(customerInfo.getPassword());
-        customer.setDob(customerInfo.getDob());
-        customer.setGender(customerInfo.getGender());
+        Customer customer = customerMapper.mapCustomerEntity(customerInfo);
         customerRepository.save(customer);
 
         List<AddressInfo> addressInfoList = customerInfo.getAddress();
         for (AddressInfo addressInfo : addressInfoList) {
-            Address address = new Address();
-            address.setAddressType(addressInfo.getAddressType());
-            address.setStreet1(addressInfo.getStreet1());
-            address.setStreet2(addressInfo.getStreet2());
-            address.setCityOrTown(addressInfo.getCityOrTown());
-            address.setDistrict(addressInfo.getDistrict());
-            address.setState(addressInfo.getState());
-            address.setCountry(addressInfo.getCountry());
-            address.setPinCode(addressInfo.getPinCode());
+            Address address = customerMapper.mapAddressEntity(addressInfo);
             address.setCustomer(customer);
             addressRepository.save(address);
         }
@@ -54,27 +44,13 @@ public class CustomerService {
     @Transactional(readOnly = true)
     public CustomerInfo getCustomerInfo(String mobileNo) {
         Customer customer = customerRepository.findByPhoneNo(mobileNo);
-        CustomerInfo customerInfo = new CustomerInfo();
-        customerInfo.setName(customer.getName());
-        customerInfo.setEmail(customer.getEmail());
-        customerInfo.setGender(customer.getGender());
-        customerInfo.setDob(customer.getDob());
-        customerInfo.setPassword(customer.getPassword());
-        customerInfo.setPhone(customer.getMobileNo());
+        CustomerInfo customerInfo = customerMapper.mapCustomerInfo(customer);
 
         List<AddressInfo> addressInfoList = new ArrayList<>();
 
         List<Address> addresses = customer.getAddresses();
         for (Address address : addresses) {
-            AddressInfo addressInfo = new AddressInfo();
-            addressInfo.setAddressType(address.getAddressType());
-            addressInfo.setStreet1(address.getStreet1());
-            addressInfo.setStreet2(address.getStreet2());
-            addressInfo.setCityOrTown(address.getCityOrTown());
-            addressInfo.setDistrict(address.getDistrict());
-            addressInfo.setState(address.getState());
-            addressInfo.setCountry(address.getCountry());
-            addressInfo.setPinCode(address.getPinCode());
+            AddressInfo addressInfo = customerMapper.mapAddressInfo(address);
             addressInfoList.add(addressInfo);
         }
         customerInfo.setAddress(addressInfoList);
@@ -92,46 +68,66 @@ public class CustomerService {
     @Transactional
     public String updateCustomerInfo(CustomerInfo customerInfo) {
         Customer customer = customerRepository.findByPhoneNo(customerInfo.getPhone());
-        customer.setName(customerInfo.getName());
-        customer.setEmail(customerInfo.getEmail());
-        customer.setPassword(customerInfo.getPassword());
-        customer.setDob(customerInfo.getDob());
-        customer.setGender(customerInfo.getGender());
-
-        List<AddressInfo> addressInfoList = customerInfo.getAddress();
-        List<Address> addressList = customer.getAddresses();
-
-        for (AddressInfo addressInfo : addressInfoList) {
-            Optional<Address> addressOptional = addressList.stream().filter(address -> Objects.equals(address.getAddressType(), addressInfo.getAddressType())).findFirst();
-            if (addressOptional.isPresent()) {
-                Address address = addressOptional.get();
-                address.setStreet1(addressInfo.getStreet1());
-                address.setStreet2(addressInfo.getStreet2());
-                address.setCityOrTown(addressInfo.getCityOrTown());
-                address.setDistrict(addressInfo.getDistrict());
-                address.setState(addressInfo.getState());
-                address.setCountry(addressInfo.getCountry());
-                address.setPinCode(addressInfo.getPinCode());
-                address.setCustomer(customer);
-
-            }
-        }
-        addressInfoList.removeIf(addressInfo -> addressList.stream().anyMatch(address -> Objects.equals(address.getAddressType(), addressInfo.getAddressType())));
-
-        for (AddressInfo addressInfo : addressInfoList) {
-            Address address = new Address();
-            address.setAddressType(addressInfo.getAddressType());
-            address.setStreet1(addressInfo.getStreet1());
-            address.setStreet2(addressInfo.getStreet2());
-            address.setCityOrTown(addressInfo.getCityOrTown());
-            address.setDistrict(addressInfo.getDistrict());
-            address.setState(addressInfo.getState());
-            address.setCountry(addressInfo.getCountry());
-            address.setPinCode(addressInfo.getPinCode());
-            address.setCustomer(customer);
-            addressList.add(address);
+        if (customer == null) {
+            throw new RuntimeException("customer not found");
+        } else {
+            customerMapper.mapCustome(customer, customerInfo);
         }
         return "Customer Updated Successfully";
     }
 
+    @Transactional
+    public String updateExistingAddress(CustomerInfo customerInfo) {
+        Customer customer = customerRepository.findByPhoneNo(customerInfo.getPhone());
+        if (customer == null) {
+            throw new RuntimeException("Address not found with phone no: " + customerInfo.getPhone());
+        } else {
+            List<AddressInfo> addressInfoList = customerInfo.getAddress();
+            List<Address> addressList = customer.getAddresses();
+
+            for (AddressInfo addressInfo : addressInfoList) {
+                Optional<Address> addressOptional = addressList.stream().filter(address -> Objects.equals(address.getAddressType(), addressInfo.getAddressType())).findFirst();
+                if (addressOptional.isPresent()) {
+                    Address address = addressOptional.get();
+                    customerMapper.mapAddress(address, addressInfo);
+                }
+            }
+        }
+        return "Address Updated Successfully";
+    }
+
+    @Transactional
+    public String updateNewAddress(CustomerInfo customerInfo,String mobileNo) {
+        System.out.println(customerInfo.toString());
+        Customer customer = customerRepository.findByPhoneNo(mobileNo);
+        System.out.println(customer.toString());
+        if (customer == null) {
+            throw new RuntimeException("Customer not found with phone no: " + customerInfo.getPhone());
+        }
+        else {
+            List<AddressInfo> addressInfoList = customerInfo.getAddress();
+            List<Address> addressList = customer.getAddresses();
+            addressInfoList.removeIf(addressInfo -> addressList.stream().anyMatch(address -> Objects.equals(address.getAddressType(), addressInfo.getAddressType())));          for (AddressInfo addressInfo : addressInfoList) {
+                for (AddressInfo addressinfo : addressInfoList) {
+                    Address address = customerMapper.mapAddressEntity(addressInfo);
+                    address.setCustomer(customer);
+                    addressList.add(address);
+                }
+            }
+        }
+        return "Address Updated Successfully";
+    }
+
+    @Transactional
+    public String deleteExistingAddress(String mobileNo,String addressType){
+        Customer customer=customerRepository.findByPhoneNo(mobileNo);
+        List<Address> addressList=customer.getAddresses();
+        Optional<Address> addressOptional=addressList.stream().filter(address->address.getAddressType().equals(addressType)).findAny();
+       if (addressOptional.isPresent()) {
+            addressList.remove(addressOptional.get());
+        }else{
+            throw new RuntimeException("Address not found with Address Type: " + addressType);
+        }
+        return "Address Deleted Successfully";
+    }
 }
